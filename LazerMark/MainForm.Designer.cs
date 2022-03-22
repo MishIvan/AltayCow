@@ -38,6 +38,15 @@ namespace LazerMark
         private Button btnBrowse;
         private TextBox txtDataFile;
         private Label label3;
+        protected override void Dispose(bool disposing)
+        {
+            if ((!disposing ? false : this.components != null))
+            {
+                this.components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
         private void InitializeComponent()
         {
             this.txtIP = new System.Windows.Forms.TextBox();
@@ -85,7 +94,7 @@ namespace LazerMark
             this.btnListen.TabIndex = 2;
             this.btnListen.Text = "Listen";
             this.btnListen.UseVisualStyleBackColor = true;
-            this.btnListen.Click += new System.EventHandler(this.btnListen_Click);
+            this.btnListen.Click += new System.EventHandler(this.OnListen);
             // 
             // txtLog
             // 
@@ -177,18 +186,19 @@ namespace LazerMark
             this.btnStart.TabIndex = 10;
             this.btnStart.Text = "Start";
             this.btnStart.UseVisualStyleBackColor = true;
-            this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
+            this.btnStart.Click += new System.EventHandler(this.OnStart);
             // 
             // btnBrowse
             // 
+            this.btnBrowse.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.btnBrowse.Location = new System.Drawing.Point(525, 117);
             this.btnBrowse.Margin = new System.Windows.Forms.Padding(4);
             this.btnBrowse.Name = "btnBrowse";
-            this.btnBrowse.Size = new System.Drawing.Size(72, 31);
+            this.btnBrowse.Size = new System.Drawing.Size(41, 22);
             this.btnBrowse.TabIndex = 67;
-            this.btnBrowse.Text = "Browse";
+            this.btnBrowse.Text = "...";
             this.btnBrowse.UseVisualStyleBackColor = true;
-            this.btnBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
+            this.btnBrowse.Click += new System.EventHandler(this.OnFileBrowse);
             // 
             // txtDataFile
             // 
@@ -209,7 +219,7 @@ namespace LazerMark
             this.label3.TabIndex = 65;
             this.label3.Text = "Data File:";
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -225,7 +235,8 @@ namespace LazerMark
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "BslSockets System";
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnClose);
+            this.Load += new System.EventHandler(this.Form_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.ResumeLayout(false);

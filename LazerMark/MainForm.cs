@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.IO;
@@ -14,14 +15,19 @@ using System.Windows.Forms;
 
 namespace LazerMark
 {
+    delegate void wLog(String msg);
     public partial class MainForm : Form
     {
         private Dictionary<string, Socket> dic = new Dictionary<string, Socket>();
-
+        SentInfo sentInfo;
+        bool dataSent;
+        Socket socket;
         public MainForm()
         {
             this.InitializeComponent();
             Control.CheckForIllegalCrossThreadCalls = false;
+            sentInfo = new SentInfo();
+            dataSent = false;
         }
 
         private void AcceptInfo(object o)
@@ -59,27 +65,34 @@ namespace LazerMark
 
         private void AutoPrint()
         {
-            System.Timers.Timer t = new System.Timers.Timer(10);
-            t.Elapsed += new ElapsedEventHandler(this.CheckData);
-            t.AutoReset = true;
-            t.Enabled = true;
+            //System.Timers.Timer t = new System.Timers.Timer(10);
+            //t.Elapsed += new ElapsedEventHandler(this.CheckData);
+            //t.AutoReset = true;
+            //t.Enabled = !dataSent;
+            CheckData(null, null);
         }
 
-        private void btnListen_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Нажание на кнопку Listen
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnListen(object sender, EventArgs e)
         {
-            IPAddress ip = IPAddress.Parse(this.txtIP.Text);
-            IPEndPoint point = new IPEndPoint(ip, int.Parse(this.txtPort.Text));
-            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            IPAddress ip = IPAddress.Parse(txtIP.Text);
+            IPEndPoint point = new IPEndPoint(ip, int.Parse(txtPort.Text));
+            this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
-                socket.Bind(point);
-                socket.Listen(10);
+                //socket.Bind(point);
+                //socket.Listen(10);
+                socket.Connect(point);
                 this.ShowMsg("The server is listening...");
-                Thread thread = new Thread(new ParameterizedThreadStart(this.AcceptInfo))
-                {
-                    IsBackground = true
-                };
-                thread.Start(socket);
+                //Thread thread = new Thread(new ParameterizedThreadStart(this.AcceptInfo))
+                //{
+                //    IsBackground = true
+                //};
+                //thread.Start(socket);
                 this.btnListen.Enabled = false;
             }
             catch (Exception exception)
@@ -88,25 +101,37 @@ namespace LazerMark
             }
         }
 
-        private void btnSendMsg_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Нажатие на кнопку Start
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnStart(object sender, EventArgs e)
         {
-            try
+            String srcFile = MyXmlSet.GetMyConfig("/configuration/srcFile");
+            if(String.IsNullOrEmpty(srcFile) || String.IsNullOrWhiteSpace(srcFile))
             {
-                this.SendMsg("");
+                WriteLogMsg(LazerMark.Properties.Resources.FILE_NAME_EMPTY);
+                return;
             }
-            catch (Exception exception)
+            if(!File.Exists(srcFile))
             {
-                this.ShowMsg(exception.Message);
-            }
-        }
+                WriteLogMsg(String.Format(LazerMark.Properties.Resources.FILE_NOT_EXISTS,srcFile));
+                return;
 
-        private void btnStart_Click(object sender, EventArgs e)
-        {
+            }
+            sentInfo.srcFile = srcFile;
+            if (sentInfo.FillData())
+                AutoPrint();
+            else
+                WriteLogMsg(String.Format(LazerMark.Properties.Resources.ERROR_FILE_READ, srcFile));
+
             /*if (this.txtIpPort.Text == "")
             {
                 MessageBox.Show("The client is not connect,please check!");
             }
-            else*/ if (!(MyXmlSet.GetMyConfig("/configuration/srcFile").Trim() == ""))
+            else
+            if (!(MyXmlSet.GetMyConfig("/configuration/srcFile").Trim() == ""))
             {
                 this.AutoPrint();
                 this.btnStart.Enabled = false;
@@ -114,112 +139,121 @@ namespace LazerMark
             else
             {
                 MessageBox.Show("Please set source data first!");
-            }
+            } */
         }
 
-        private void CheckData(object source, ElapsedEventArgs e)
+    private void CheckData(object source, ElapsedEventArgs e)
+    {
+        if(!sentInfo.IsEmpty())
         {
-            string srcFile = MyXmlSet.GetMyConfig("/configuration/srcFile");
-            if (File.Exists(srcFile))
+            String str = sentInfo.GetString();            
+            byte[] buffer = Encoding.UTF8.GetBytes(string.Concat(str, ";;"));
+            int n = socket.Send(buffer);
+            if (n > 0)
             {
-                if (!File.Exists(MyPublicCS.destFile))
+                WriteLogMsg("Sent: " + str);
+                byte[] recvbuf = new byte[1024];
+                n = socket.Receive(recvbuf);
+                if(n > 0)
                 {
-                    File.Copy(srcFile, MyPublicCS.destFile);
-                    File.Delete(srcFile);
-                    int dataRowCount = 0;
-                    DataTable dt = MyPublicCS.GetTxtData(MyPublicCS.destFile);
-                    if ((dt == null ? true : dt.Rows.Count <= 0))
-                    {
-                        MessageBox.Show("The source text file is empty,please check!");
-                    }
-                    else
-                    {
-                        dataRowCount = dt.Rows.Count;
-                        MyXmlSet.SetMyConfig("/configuration/dataRowCount", dataRowCount.ToString());
-                        MyXmlSet.SetMyConfig("/configuration/dataLineNumber", "1");
-                        this.MySendMsg();
-                    }
+                    String s1 = Encoding.UTF8.GetString(recvbuf);
+                    sentInfo.Remove();
+                    WriteLogMsg("Received: " + s1);
+
                 }
             }
-        }
 
-        protected override void Dispose(bool disposing)
+        }
+        else
         {
-            if ((!disposing ? false : this.components != null))
+            WriteLogMsg("All data has been sent...");
+            dataSent = true;
+        }
+          
+        /*string srcFile = MyXmlSet.GetMyConfig("/configuration/srcFile");            
+        if (File.Exists(srcFile))
+        {
+            if (!File.Exists(MyPublicCS.destFile))
             {
-                this.components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            //this.MyInit();
-            this.txtDataFile.Text = MyXmlSet.GetMyConfig("/configuration/srcFile");
-
-        }
-
-        private void frmSet_OnBrowseOpen(string s)
-        {
-            this.SetPrintedCount(s);
-        }
-        private void btnBrowse_Click(object sender, EventArgs e)
-        {
-            string resultFile = String.Empty;
-            OpenFileDialog ofn = new OpenFileDialog();
-            ofn.InitialDirectory = Environment.CurrentDirectory; //"./OriginalData/",
-            ofn.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            ofn.FilterIndex = 2;
-            ofn.RestoreDirectory = true;
-            if (ofn.ShowDialog() == DialogResult.OK)
-            {
-                resultFile = ofn.FileName;
-                this.txtDataFile.Text = resultFile;
-                MyXmlSet.SetMyConfig("/configuration/srcFile", resultFile);
-                if (File.Exists(MyPublicCS.destFile))
+                File.Copy(srcFile, MyPublicCS.destFile);
+                File.Delete(srcFile);
+                int dataRowCount = 0;
+                DataTable dt = MyPublicCS.GetTxtData(MyPublicCS.destFile);
+                if ((dt == null ? true : dt.Rows.Count <= 0))
                 {
-                    File.Delete(MyPublicCS.destFile);
+                    MessageBox.Show("The source text file is empty,please check!");
+                }
+                else
+                {
+                    dataRowCount = dt.Rows.Count;
+                    MyXmlSet.SetMyConfig("/configuration/dataRowCount", dataRowCount.ToString());
+                    MyXmlSet.SetMyConfig("/configuration/dataLineNumber", "1");
+                    this.MySendMsg();
                 }
             }
-        }
+        }*/
+    }
 
 
-        //private void MyInit()
-        //{
-        //    frmSet.OnBrowseOpen += new frmSet.DBrowseOpen(this.frmSet_OnBrowseOpen);
-        //    if (File.Exists(MyPublicCS.destFile))
-        //    {
-        //        File.Delete(MyPublicCS.destFile);
-        //    }
-        //}
+    private void Form_Load(object sender, EventArgs e)
+    {
+            this.txtDataFile.Text = Settings.Default.srcFile;
+                //MyXmlSet.GetMyConfig("/configuration/srcFile");
 
-        private void MySendMsg()
+    }
+
+    /// <summary>
+    /// Выбрать файл, строки из которого следует отправить на маркиратор
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnFileBrowse(object sender, EventArgs e)
+    {
+        string resultFile = String.Empty;
+        OpenFileDialog ofn = new OpenFileDialog();
+        ofn.InitialDirectory = Environment.CurrentDirectory; //"./OriginalData/",
+        ofn.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+        ofn.FilterIndex = 2;
+        ofn.RestoreDirectory = true;
+        if (ofn.ShowDialog() == DialogResult.OK)
         {
-            DataTable dtSrc = MyPublicCS.GetTxtData(MyPublicCS.destFile);
-            if ((dtSrc == null ? false : dtSrc.Rows.Count >= 1))
+            resultFile = ofn.FileName;
+            this.txtDataFile.Text = resultFile;
+            MyXmlSet.SetMyConfig("/configuration/srcFile", resultFile);
+            if (File.Exists(MyPublicCS.destFile))
             {
-                string nDataLineNumber = MyXmlSet.GetMyConfig("/configuration/dataLineNumber");
-                string dataRowCount = MyXmlSet.GetMyConfig("/configuration/dataRowCount");
-                string msg = "";
-                for (int i = 0; i < dtSrc.Rows.Count; i++)
-                {
-                    if (nDataLineNumber == dtSrc.Rows[i][0].ToString())
-                    {
-                        msg = dtSrc.Rows[i][1].ToString();
-                    }
-                }
-                if (msg.Trim() != "")
-                {
-                    //this.SendMsg(msg);                    
-                    WriteLogMsg(msg);
-                    this.SetPrintedCount(string.Concat("Printing:", nDataLineNumber, "/", dataRowCount));
-                }
-            }
-            else
-            {
-                MessageBox.Show("The source data text file is empty,please check!");
+                File.Delete(MyPublicCS.destFile);
             }
         }
+    }
+
+    private void MySendMsg()
+    {
+        DataTable dtSrc = MyPublicCS.GetTxtData(MyPublicCS.destFile);
+        if ((dtSrc == null ? false : dtSrc.Rows.Count >= 1))
+        {
+            string nDataLineNumber = MyXmlSet.GetMyConfig("/configuration/dataLineNumber");
+            string dataRowCount = MyXmlSet.GetMyConfig("/configuration/dataRowCount");
+            string msg = "";
+            for (int i = 0; i < dtSrc.Rows.Count; i++)
+            {
+                if (nDataLineNumber == dtSrc.Rows[i][0].ToString())
+                {
+                    msg = dtSrc.Rows[i][1].ToString();
+                }
+            }
+            if (msg.Trim() != "")
+            {
+                this.SendMsg(msg);                    
+                WriteLogMsg(msg);
+                this.SetPrintedCount(string.Concat("Printing:", nDataLineNumber, "/", dataRowCount));
+            }
+        }
+        else
+        {
+            MessageBox.Show("The source data text file is empty,please check!");
+        }
+    }
 
         private void ReceiveMsg(object o)
         {
@@ -326,5 +360,14 @@ namespace LazerMark
         }
 
         private delegate void DelegateShowPrinted(string s);
+
+        private void OnClose(object sender, FormClosedEventArgs e)
+        {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            AppSettingsSection app = config.AppSettings;
+            this.socket.Close();
+            //app.Settings["srcFile"].Value = txtDataFile.Text;
+            //config.Save(ConfigurationSaveMode.Modified);
+        }
     }
 }

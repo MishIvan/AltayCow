@@ -120,4 +120,13 @@
   <data name="CFG_FILE" xml:space="preserve">
     <value>App.config</value>
   </data>
+  <data name="ERROR_FILE_READ" xml:space="preserve">
+    <value>Data File {0} can't be read. May be file not exists.</value>
+  </data>
+  <data name="FILE_NAME_EMPTY" xml:space="preserve">
+    <value>Data File name is empty.</value>
+  </data>
+  <data name="FILE_NOT_EXISTS" xml:space="preserve">
+    <value>Data File {0} not exists</value>
+  </data>
 </root>

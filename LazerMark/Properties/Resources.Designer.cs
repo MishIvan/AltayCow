@@ -68,5 +68,32 @@ namespace LazerMark.Properties {
                 return ResourceManager.GetString("CFG_FILE", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Data File {0} can&apos;t be read. May be file not exists..
+        /// </summary>
+        internal static string ERROR_FILE_READ {
+            get {
+                return ResourceManager.GetString("ERROR_FILE_READ", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Data File name is empty..
+        /// </summary>
+        internal static string FILE_NAME_EMPTY {
+            get {
+                return ResourceManager.GetString("FILE_NAME_EMPTY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Data File {0} not exists.
+        /// </summary>
+        internal static string FILE_NOT_EXISTS {
+            get {
+                return ResourceManager.GetString("FILE_NOT_EXISTS", resourceCulture);
+            }
+        }
     }
 }
