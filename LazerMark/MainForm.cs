@@ -15,18 +15,19 @@ using System.Windows.Forms;
 
 namespace LazerMark
 {
-    delegate void wLog(String msg);
     public partial class MainForm : Form
     {
         SentInfo sentInfo; // имя файла данных и
         bool dataSent; // если все данные из файла были отправлены
         System.Timers.Timer sendTimer;
+        int stringCounter;
         public MainForm()
         {
             this.InitializeComponent();
             Control.CheckForIllegalCrossThreadCalls = false;
             sentInfo = new SentInfo();
             dataSent = false;
+            stringCounter = 0;
         }
 
         /// <summary>
@@ -37,13 +38,13 @@ namespace LazerMark
             sendTimer = new System.Timers.Timer(50)
             {
                 AutoReset = true,
-                Enabled = !dataSent
+                Enabled = !dataSent,
             };
             sendTimer.Elapsed += new ElapsedEventHandler(this.CheckData);        
         }
 
         /// <summary>
-        /// Нажание на кнопку Listen
+        /// Проверка соединения с удалённым хостом
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -88,58 +89,73 @@ namespace LazerMark
             }
             sentInfo.srcFile = srcFile;
             if (sentInfo.FillData())
+            {
+                lblPrintedCount.Text = $"Printing: 0\\{sentInfo.initialLineCount}";
                 AutoPrint();
+            }
             else
                 WriteLogMsg(String.Format(LazerMark.Properties.Resources.ERROR_FILE_READ, srcFile));
             btnStart.Enabled = false;
         }
 
-    private void CheckData(object source, ElapsedEventArgs e)
-    {
-        if(!sentInfo.IsEmpty())
+        /// <summary>
+        /// отсылка данных и получение ответа от удалённого хоста
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="e"></param>
+        private void CheckData(object source, ElapsedEventArgs e)
         {
-            IPAddress ip = IPAddress.Parse(txtIP.Text);
-            IPEndPoint point = new IPEndPoint(ip, int.Parse(txtPort.Text));
-            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
+            if(!sentInfo.IsEmpty())
             {
-                String str = sentInfo.GetString();
-                byte[] buffer = Encoding.UTF8.GetBytes(string.Concat(str, ";;"));
-                socket.Connect(point);
-                int n = socket.Send(buffer);
-                if (n > 0)
+                dataSent = false;
+                IPAddress ip = IPAddress.Parse(txtIP.Text);
+                IPEndPoint point = new IPEndPoint(ip, int.Parse(txtPort.Text));
+                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                try
                 {
-                    WriteLogMsg("Sent: " + str);
-                    byte[] recvbuf = new byte[1024];
-                    n = socket.Receive(recvbuf);
+                    String str = sentInfo.GetString();
+                    byte[] buffer = Encoding.UTF8.GetBytes(string.Concat(str, ";;"));
+                    socket.Connect(point);
+                    int n = socket.Send(buffer);
                     if (n > 0)
                     {
-                        String s1 = Encoding.UTF8.GetString(recvbuf, 0, n);
-                        sentInfo.Remove();
-                        WriteLogMsg("Received: " + s1);
+                        WriteLogMsg("Sent: " + str);
+                        byte[] recvbuf = new byte[1024];
+                        n = socket.Receive(recvbuf);
+                        if (n > 0)
+                        {
+                            String s1 = Encoding.UTF8.GetString(recvbuf, 0, n);
+                            sentInfo.Remove();
+                            WriteLogMsg("Received: " + s1);
+                            lblPrintedCount.Text = $"Printing {++stringCounter}/{sentInfo.initialLineCount}";
+                        }
                     }
+                    socket.Dispose();
                 }
-                socket.Dispose();
+                catch(Exception ex)
+                {
+                    WriteLogMsg("Received: " + ex.Message);
+                }
             }
-            catch(Exception ex)
+            else
             {
-                WriteLogMsg("Received: " + ex.Message);
-            }
+                WriteLogMsg("All data has been sent...");
+                dataSent = true;
+                sendTimer.Stop();
+                btnCheck.Enabled = dataSent;
+                btnStart.Enabled = dataSent;
+                txtIP.Enabled = dataSent;
+                txtPort.Enabled = dataSent;
+            }          
         }
-        else
+
+
+        private void Form_Load(object sender, EventArgs e)
         {
-            WriteLogMsg("All data has been sent...");
-            dataSent = true;
-        }          
-    }
-
-
-    private void Form_Load(object sender, EventArgs e)
-    {
-        txtDataFile.Text = MyXmlSet.GetMyConfig("/configuration/srcFile");
-        txtIP.Text = MyXmlSet.GetMyConfig("/configuration/net/ip");
-        txtPort.Text = MyXmlSet.GetMyConfig("/configuration/net/port");
-    }
+            txtDataFile.Text = MyXmlSet.GetMyConfig("/configuration/srcFile");
+            txtIP.Text = MyXmlSet.GetMyConfig("/configuration/net/ip");
+            txtPort.Text = MyXmlSet.GetMyConfig("/configuration/net/port");
+        }
 
         /// <summary>
         /// Выбрать файл, строки из которого следует отправить на маркиратор
@@ -202,11 +218,11 @@ namespace LazerMark
 
         private delegate void DelegateShowPrinted(string s);
 
-        /// <summary>
-        /// Сохранить настройки. Меню Save Settings
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+            /// <summary>
+            /// Сохранить настройки. Меню Save Settings
+            /// </summary>
+            /// <param name="sender"></param>
+            /// <param name="e"></param>
         private void OnSaveConfig(object sender, EventArgs e)
         {
             MyXmlSet.SetMyConfig("/configuration/srcFile", txtDataFile.Text);
