@@ -148,6 +148,7 @@ namespace LazerMark
                 {
                     WriteLogMsg("Received: " + ex.Message);
                     sentStatus = -1;
+                    stringCounter = 0;
                 }
             }
             else
@@ -158,6 +159,7 @@ namespace LazerMark
                 btnStart.Enabled = true;
                 txtIP.Enabled = true;
                 txtPort.Enabled = true;
+                stringCounter = 0;
             }          
         }
 
@@ -274,6 +276,7 @@ namespace LazerMark
         private void OnLogClear(object sender, EventArgs e)
         {
             txtLog.Text = String.Empty;
+            lblPrintedCount.Text = "Printing: 0/0";
         }
     }
 }
