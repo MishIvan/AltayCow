@@ -79,6 +79,15 @@ namespace LazerMark.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Data transfer process is in action. Can&apos;t close the form..
+        /// </summary>
+        internal static string DATA_TRANSFER {
+            get {
+                return ResourceManager.GetString("DATA_TRANSFER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Data File {0} can&apos;t be read. May be file not exists..
         /// </summary>
         internal static string ERROR_FILE_READ {

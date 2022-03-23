@@ -33,6 +33,7 @@ namespace LazerMark
 
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.txtIP = new System.Windows.Forms.TextBox();
             this.txtPort = new System.Windows.Forms.TextBox();
@@ -50,6 +51,9 @@ namespace LazerMark
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveConfigurationMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sendTimer = new System.Windows.Forms.Timer(this.components);
+            this.clearLogMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mainFormToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox1.SuspendLayout();
             this.menuFile.SuspendLayout();
             this.SuspendLayout();
@@ -62,6 +66,7 @@ namespace LazerMark
             this.txtIP.Size = new System.Drawing.Size(123, 22);
             this.txtIP.TabIndex = 0;
             this.txtIP.Text = "192.168.1.30";
+            this.mainFormToolTip.SetToolTip(this.txtIP, "IP setting");
             // 
             // txtPort
             // 
@@ -71,6 +76,7 @@ namespace LazerMark
             this.txtPort.Size = new System.Drawing.Size(67, 22);
             this.txtPort.TabIndex = 1;
             this.txtPort.Text = "34567";
+            this.mainFormToolTip.SetToolTip(this.txtPort, "Port setting");
             // 
             // txtLog
             // 
@@ -106,6 +112,7 @@ namespace LazerMark
             this.btnCheck.Size = new System.Drawing.Size(82, 32);
             this.btnCheck.TabIndex = 10;
             this.btnCheck.Text = "Check";
+            this.mainFormToolTip.SetToolTip(this.btnCheck, "Checking connection");
             this.btnCheck.UseVisualStyleBackColor = true;
             this.btnCheck.Click += new System.EventHandler(this.OnCheck);
             // 
@@ -151,6 +158,7 @@ namespace LazerMark
             this.btnStart.Size = new System.Drawing.Size(95, 53);
             this.btnStart.TabIndex = 10;
             this.btnStart.Text = "Start";
+            this.mainFormToolTip.SetToolTip(this.btnStart, "Start data sending");
             this.btnStart.UseVisualStyleBackColor = true;
             this.btnStart.Click += new System.EventHandler(this.OnStart);
             // 
@@ -163,6 +171,7 @@ namespace LazerMark
             this.btnBrowse.Size = new System.Drawing.Size(41, 22);
             this.btnBrowse.TabIndex = 67;
             this.btnBrowse.Text = "...";
+            this.mainFormToolTip.SetToolTip(this.btnBrowse, "Data File choice");
             this.btnBrowse.UseVisualStyleBackColor = true;
             this.btnBrowse.Click += new System.EventHandler(this.OnFileBrowse);
             // 
@@ -174,6 +183,7 @@ namespace LazerMark
             this.txtDataFile.ReadOnly = true;
             this.txtDataFile.Size = new System.Drawing.Size(413, 22);
             this.txtDataFile.TabIndex = 66;
+            this.mainFormToolTip.SetToolTip(this.txtDataFile, "Data File full name");
             // 
             // label3
             // 
@@ -200,6 +210,7 @@ namespace LazerMark
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.saveConfigurationMenuItem,
+            this.clearLogMenuItem,
             this.exitMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(46, 24);
@@ -218,6 +229,17 @@ namespace LazerMark
             this.exitMenuItem.Size = new System.Drawing.Size(224, 26);
             this.exitMenuItem.Text = "Exit";
             this.exitMenuItem.Click += new System.EventHandler(this.OnExit);
+            // 
+            // sendTimer
+            // 
+            this.sendTimer.Tick += new System.EventHandler(this.CheckData);
+            // 
+            // clearLogMenuItem
+            // 
+            this.clearLogMenuItem.Name = "clearLogMenuItem";
+            this.clearLogMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.clearLogMenuItem.Text = "Clear Log";
+            this.clearLogMenuItem.Click += new System.EventHandler(this.OnLogClear);
             // 
             // MainForm
             // 
@@ -238,6 +260,7 @@ namespace LazerMark
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "Sending Mark Data";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnClosing);
             this.Load += new System.EventHandler(this.Form_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -253,5 +276,8 @@ namespace LazerMark
         private ToolStripMenuItem fileToolStripMenuItem;
         private ToolStripMenuItem saveConfigurationMenuItem;
         private ToolStripMenuItem exitMenuItem;
+        private Timer sendTimer;
+        private ToolStripMenuItem clearLogMenuItem;
+        private ToolTip mainFormToolTip;
     }
 }

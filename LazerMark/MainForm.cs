@@ -18,15 +18,22 @@ namespace LazerMark
     public partial class MainForm : Form
     {
         SentInfo sentInfo; // имя файла данных и
-        bool dataSent; // если все данные из файла были отправлены
-        System.Timers.Timer sendTimer;
+        /// <summary>
+        /// Статус отсылки
+        /// 0 - обработка не начиналась
+        /// 1 - соединение усрановлено
+        /// 2 - данные передаются
+        /// 3 - данные переданы
+        /// -1 - ошибка передачи данных или соединения
+        /// </summary>
+        int sentStatus; // если все данные из файла были отправлены
         int stringCounter;
         public MainForm()
         {
             this.InitializeComponent();
             Control.CheckForIllegalCrossThreadCalls = false;
             sentInfo = new SentInfo();
-            dataSent = false;
+            sentStatus = 0;
             stringCounter = 0;
         }
 
@@ -35,12 +42,9 @@ namespace LazerMark
         /// </summary>
         private void AutoPrint()
         {
-            sendTimer = new System.Timers.Timer(50)
-            {
-                AutoReset = true,
-                Enabled = !dataSent,
-            };
-            sendTimer.Elapsed += new ElapsedEventHandler(this.CheckData);        
+            sendTimer.Interval = 50;
+            sendTimer.Enabled = sentStatus == 1 || sentStatus == 2;
+            sendTimer.Start();
         }
 
         /// <summary>
@@ -61,10 +65,12 @@ namespace LazerMark
                 btnCheck.Enabled = false;
                 txtIP.Enabled = false;
                 txtPort.Enabled = false;
+                sentStatus = 1;
             }
             catch (Exception exception)
             {
                 this.ShowMsg(exception.Message);
+                sentStatus = -1;
             }
         }
 
@@ -75,15 +81,17 @@ namespace LazerMark
         /// <param name="e"></param>
         private void OnStart(object sender, EventArgs e)
         {
-            String srcFile = MyXmlSet.GetMyConfig("/configuration/srcFile");
+            String srcFile = txtDataFile.Text;
             if(String.IsNullOrEmpty(srcFile) || String.IsNullOrWhiteSpace(srcFile))
             {
                 WriteLogMsg(LazerMark.Properties.Resources.FILE_NAME_EMPTY);
+                sentStatus = -1;
                 return;
             }
             if(!File.Exists(srcFile))
             {
                 WriteLogMsg(String.Format(LazerMark.Properties.Resources.FILE_NOT_EXISTS,srcFile));
+                sentStatus = -1;
                 return;
 
             }
@@ -94,7 +102,11 @@ namespace LazerMark
                 AutoPrint();
             }
             else
+            {
                 WriteLogMsg(String.Format(LazerMark.Properties.Resources.ERROR_FILE_READ, srcFile));
+                sentStatus = -1;
+            }
+                
             btnStart.Enabled = false;
         }
 
@@ -103,11 +115,11 @@ namespace LazerMark
         /// </summary>
         /// <param name="source"></param>
         /// <param name="e"></param>
-        private void CheckData(object source, ElapsedEventArgs e)
+        private void CheckData(object source, EventArgs e)
         {
             if(!sentInfo.IsEmpty())
             {
-                dataSent = false;
+                sentStatus = 2;
                 IPAddress ip = IPAddress.Parse(txtIP.Text);
                 IPEndPoint point = new IPEndPoint(ip, int.Parse(txtPort.Text));
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -135,17 +147,17 @@ namespace LazerMark
                 catch(Exception ex)
                 {
                     WriteLogMsg("Received: " + ex.Message);
+                    sentStatus = -1;
                 }
             }
             else
             {
                 WriteLogMsg("All data has been sent...");
-                dataSent = true;
+                sentStatus = 3;
                 sendTimer.Stop();
-                btnCheck.Enabled = dataSent;
-                btnStart.Enabled = dataSent;
-                txtIP.Enabled = dataSent;
-                txtPort.Enabled = dataSent;
+                btnStart.Enabled = true;
+                txtIP.Enabled = true;
+                txtPort.Enabled = true;
             }          
         }
 
@@ -218,11 +230,11 @@ namespace LazerMark
 
         private delegate void DelegateShowPrinted(string s);
 
-            /// <summary>
-            /// Сохранить настройки. Меню Save Settings
-            /// </summary>
-            /// <param name="sender"></param>
-            /// <param name="e"></param>
+        /// <summary>
+        /// Сохранить настройки. Меню Save Settings
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnSaveConfig(object sender, EventArgs e)
         {
             MyXmlSet.SetMyConfig("/configuration/srcFile", txtDataFile.Text);
@@ -230,13 +242,38 @@ namespace LazerMark
             MyXmlSet.SetMyConfig("/configuration/net/port", txtPort.Text);
         }
         /// <summary>
-        /// Сохранить настройки. Меню Save Settings
+        /// Меню Exit
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void OnExit(object sender, EventArgs e)
         {
-            if(!dataSent) Close();
+            if(sentStatus < 1 || sentStatus == 3) Close();
+        }
+        
+        /// <summary>
+        /// Не закрывть форму, пока идёт передача данных
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnClosing(object sender, FormClosingEventArgs e)
+        {
+            if (sentStatus == 2)
+            {
+                WriteLogMsg(LazerMark.Properties.Resources.DATA_TRANSFER);
+                e.Cancel = true;
+            }                
+            else
+                e.Cancel = false;
+        }
+        /// <summary>
+        /// Очистить лог
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnLogClear(object sender, EventArgs e)
+        {
+            txtLog.Text = String.Empty;
         }
     }
 }

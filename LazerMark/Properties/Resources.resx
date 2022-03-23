@@ -124,6 +124,9 @@
   <data name="CONNECTION_ESTABLISHES" xml:space="preserve">
     <value>Connection established...</value>
   </data>
+  <data name="DATA_TRANSFER" xml:space="preserve">
+    <value>Data transfer process is in action. Can't close the form.</value>
+  </data>
   <data name="ERROR_FILE_READ" xml:space="preserve">
     <value>Data File {0} can't be read. May be file not exists.</value>
   </data>
