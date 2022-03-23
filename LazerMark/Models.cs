@@ -7,18 +7,12 @@ using System.IO;
 
 namespace LazerMark
 {
-    /// <summary>
-    /// Строка для отправки и статус, была ли строка отослана
-    /// </summary>
-    internal class InfoToSend
-    {
-        public String destString { get; set; } = "";
-        public bool sent { get; set; } = false;
-    }
     internal class SentInfo
     {
         public String srcFile { get; set; }
         private Queue<String> sentInfo;
+        private int _initialLineCount;
+        public int initialLineCount { get { return _initialLineCount; } }
         public SentInfo(String srcName = "")
         {
             srcFile = srcName;
@@ -29,11 +23,17 @@ namespace LazerMark
             System.IO.StreamReader sr = new System.IO.StreamReader(srcFile, Encoding.GetEncoding("utf-8"));
             try
             {
+                sentInfo.Clear();
+                _initialLineCount = 0;
                 while (true)
                 {
-                    string str = sr.ReadLine();
-                    sentInfo.Enqueue(str);
+                    string str = sr.ReadLine();                    
                     if (str == null) break;
+                    else
+                    {
+                        sentInfo.Enqueue(str);
+                        _initialLineCount++;
+                    }
                 }
                 sr.Close();
             }

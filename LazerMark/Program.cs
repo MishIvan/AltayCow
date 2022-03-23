@@ -10,7 +10,6 @@ namespace LazerMark
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            //AppDomain.CurrentDomain.SetData("APP_CONFIG_FILE", "App.config");
             Application.Run(new MainForm());
         }
     }

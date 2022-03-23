@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <net>
+    <ip>192.168.1.30</ip>
+    <port>34567</port>
+  </net>
+  <safeverify>
+    <key>E78ACD3926F48338CC4394B62A62B09564790F943A9FDAC980744A783148B7851778A7BD945F63CA3FFC5ECE811456CE00A7090B033ADBDD</key>
+  </safeverify>
+  <srcFile>C:\Users\79036\Desktop\123.txt</srcFile>
+  <dataRowCount>24</dataRowCount>
+  <dataLineNumber>3</dataLineNumber>
+</configuration>

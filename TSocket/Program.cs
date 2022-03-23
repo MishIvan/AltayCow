@@ -22,41 +22,22 @@ namespace TSocket
                 int n;
                 while (true)
                 {
-                    Thread th = new Thread(() => { 
                     Socket handler = socket.Accept();
-                    byte[] buff = new byte[1024];
-                    try
+                    do
                     {
+                        byte[] buff = new byte[1024];
                         n = handler.Receive(buff);
                         if (n > 0)
                         {
                             String s1 = Encoding.UTF8.GetString(buff, 0, n);
                             Console.WriteLine("Received : " + s1 + "\n");
-                            if (s1.ToLower() == "q")
-                            {
-                                buff = Encoding.UTF8.GetBytes("Shut down...");
-                                handler.Send(buff);
-                                handler.Shutdown(SocketShutdown.Both);
-                                handler.Close();
-                                return;
-                            }
+                            byte[] msg = System.Text.Encoding.UTF8.GetBytes(message);
+                            handler.Send(msg);
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        handler.Shutdown(SocketShutdown.Both);
-                        handler.Close();
-                        Console.WriteLine(ex.Message);
-                        return;
-                    }
-                    byte[] msg = System.Text.Encoding.UTF8.GetBytes(message);
-                    handler.Send(msg);
+                    } while (handler.Available > 0);
                     handler.Shutdown(SocketShutdown.Both);
                     handler.Close();
-                });
-                    th.Start();
-                    th.Join();
-                }                
+                }
             }
             catch(Exception ex)
             {

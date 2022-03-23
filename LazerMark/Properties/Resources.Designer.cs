@@ -61,11 +61,20 @@ namespace LazerMark.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на App.config.
+        ///   Ищет локализованную строку, похожую на MyAppConfig.xml.
         /// </summary>
         internal static string CFG_FILE {
             get {
                 return ResourceManager.GetString("CFG_FILE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Connection established....
+        /// </summary>
+        internal static string CONNECTION_ESTABLISHES {
+            get {
+                return ResourceManager.GetString("CONNECTION_ESTABLISHES", resourceCulture);
             }
         }
         
