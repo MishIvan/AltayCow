@@ -50,10 +50,12 @@ namespace LazerMark
             this.menuFile = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveConfigurationMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearLogMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sendTimer = new System.Windows.Forms.Timer(this.components);
-            this.clearLogMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainFormToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.label4 = new System.Windows.Forms.Label();
+            this.txtInterval = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.menuFile.SuspendLayout();
             this.SuspendLayout();
@@ -80,7 +82,7 @@ namespace LazerMark
             // 
             // txtLog
             // 
-            this.txtLog.Location = new System.Drawing.Point(16, 247);
+            this.txtLog.Location = new System.Drawing.Point(16, 315);
             this.txtLog.Margin = new System.Windows.Forms.Padding(4);
             this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
@@ -91,6 +93,8 @@ namespace LazerMark
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.txtInterval);
+            this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.btnCheck);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label1);
@@ -100,7 +104,7 @@ namespace LazerMark
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox1.Size = new System.Drawing.Size(425, 67);
+            this.groupBox1.Size = new System.Drawing.Size(425, 100);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "TCP Server Config";
@@ -142,7 +146,7 @@ namespace LazerMark
             this.lblPrintedCount.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.lblPrintedCount.Font = new System.Drawing.Font("Arial", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPrintedCount.ForeColor = System.Drawing.Color.Black;
-            this.lblPrintedCount.Location = new System.Drawing.Point(16, 173);
+            this.lblPrintedCount.Location = new System.Drawing.Point(16, 241);
             this.lblPrintedCount.Margin = new System.Windows.Forms.Padding(80, 0, 4, 0);
             this.lblPrintedCount.Name = "lblPrintedCount";
             this.lblPrintedCount.Size = new System.Drawing.Size(464, 53);
@@ -152,7 +156,7 @@ namespace LazerMark
             // 
             // btnStart
             // 
-            this.btnStart.Location = new System.Drawing.Point(488, 173);
+            this.btnStart.Location = new System.Drawing.Point(488, 241);
             this.btnStart.Margin = new System.Windows.Forms.Padding(4);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(95, 53);
@@ -165,7 +169,7 @@ namespace LazerMark
             // btnBrowse
             // 
             this.btnBrowse.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnBrowse.Location = new System.Drawing.Point(525, 129);
+            this.btnBrowse.Location = new System.Drawing.Point(525, 166);
             this.btnBrowse.Margin = new System.Windows.Forms.Padding(4);
             this.btnBrowse.Name = "btnBrowse";
             this.btnBrowse.Size = new System.Drawing.Size(41, 22);
@@ -177,7 +181,7 @@ namespace LazerMark
             // 
             // txtDataFile
             // 
-            this.txtDataFile.Location = new System.Drawing.Point(98, 129);
+            this.txtDataFile.Location = new System.Drawing.Point(98, 166);
             this.txtDataFile.Margin = new System.Windows.Forms.Padding(4);
             this.txtDataFile.Name = "txtDataFile";
             this.txtDataFile.ReadOnly = true;
@@ -188,7 +192,7 @@ namespace LazerMark
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(23, 129);
+            this.label3.Location = new System.Drawing.Point(23, 166);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(68, 17);
@@ -219,14 +223,21 @@ namespace LazerMark
             // saveConfigurationMenuItem
             // 
             this.saveConfigurationMenuItem.Name = "saveConfigurationMenuItem";
-            this.saveConfigurationMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.saveConfigurationMenuItem.Size = new System.Drawing.Size(180, 26);
             this.saveConfigurationMenuItem.Text = "Save Settings";
             this.saveConfigurationMenuItem.Click += new System.EventHandler(this.OnSaveConfig);
+            // 
+            // clearLogMenuItem
+            // 
+            this.clearLogMenuItem.Name = "clearLogMenuItem";
+            this.clearLogMenuItem.Size = new System.Drawing.Size(180, 26);
+            this.clearLogMenuItem.Text = "Clear Log";
+            this.clearLogMenuItem.Click += new System.EventHandler(this.OnLogClear);
             // 
             // exitMenuItem
             // 
             this.exitMenuItem.Name = "exitMenuItem";
-            this.exitMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.exitMenuItem.Size = new System.Drawing.Size(180, 26);
             this.exitMenuItem.Text = "Exit";
             this.exitMenuItem.Click += new System.EventHandler(this.OnExit);
             // 
@@ -234,18 +245,29 @@ namespace LazerMark
             // 
             this.sendTimer.Tick += new System.EventHandler(this.CheckData);
             // 
-            // clearLogMenuItem
+            // label4
             // 
-            this.clearLogMenuItem.Name = "clearLogMenuItem";
-            this.clearLogMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.clearLogMenuItem.Text = "Clear Log";
-            this.clearLogMenuItem.Click += new System.EventHandler(this.OnLogClear);
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(12, 67);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(110, 17);
+            this.label4.TabIndex = 69;
+            this.label4.Text = "Sending interval";
+            // 
+            // txtInterval
+            // 
+            this.txtInterval.Location = new System.Drawing.Point(129, 67);
+            this.txtInterval.MaxLength = 7;
+            this.txtInterval.Name = "txtInterval";
+            this.txtInterval.Size = new System.Drawing.Size(100, 22);
+            this.txtInterval.TabIndex = 70;
+            this.mainFormToolTip.SetToolTip(this.txtInterval, "Time interval fo sending data");
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(625, 487);
+            this.ClientSize = new System.Drawing.Size(625, 545);
             this.Controls.Add(this.btnBrowse);
             this.Controls.Add(this.txtDataFile);
             this.Controls.Add(this.label3);
@@ -279,5 +301,7 @@ namespace LazerMark
         private Timer sendTimer;
         private ToolStripMenuItem clearLogMenuItem;
         private ToolTip mainFormToolTip;
+        private TextBox txtInterval;
+        private Label label4;
     }
 }

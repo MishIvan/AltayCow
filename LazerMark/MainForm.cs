@@ -42,7 +42,7 @@ namespace LazerMark
         /// </summary>
         private void AutoPrint()
         {
-            sendTimer.Interval = 50;
+            sendTimer.Interval = int.Parse(txtInterval.Text);
             sendTimer.Enabled = sentStatus == 1 || sentStatus == 2;
             sendTimer.Start();
         }
@@ -169,6 +169,7 @@ namespace LazerMark
             txtDataFile.Text = MyXmlSet.GetMyConfig("/configuration/srcFile");
             txtIP.Text = MyXmlSet.GetMyConfig("/configuration/net/ip");
             txtPort.Text = MyXmlSet.GetMyConfig("/configuration/net/port");
+            txtInterval.Text = MyXmlSet.GetMyConfig("/configuration/net/interval");
         }
 
         /// <summary>
@@ -242,6 +243,7 @@ namespace LazerMark
             MyXmlSet.SetMyConfig("/configuration/srcFile", txtDataFile.Text);
             MyXmlSet.SetMyConfig("/configuration/net/ip", txtIP.Text);
             MyXmlSet.SetMyConfig("/configuration/net/port", txtPort.Text);
+            MyXmlSet.SetMyConfig("/configuration/net/interval", txtPort.Text);
         }
         /// <summary>
         /// Меню Exit
