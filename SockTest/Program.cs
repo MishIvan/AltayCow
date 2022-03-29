@@ -19,10 +19,10 @@ namespace SockTest
                 {
                     Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     socket.Connect(point);
-                    Console.WriteLine("Enter string to send: ");
-                    String smsg = Console.ReadLine();
+                    //Console.WriteLine("Enter string to send: ");
+                    String smsg = "Ready!";
                     byte[] msg = System.Text.Encoding.UTF8.GetBytes(smsg);
-                    int nbytes = socket.Send(msg);
+                    int nbytes = socket.Send(msg, smsg.Length, SocketFlags.None);
 
                     if (nbytes > 0)
                     {
