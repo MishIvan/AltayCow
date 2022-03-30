@@ -13,35 +13,36 @@ namespace SockTest
         static void Main(string[] args)
         {
             IPAddress ip = IPAddress.Parse("192.168.0.100");
-            IPEndPoint point = new IPEndPoint(ip, 8081);            
-            for (int i = 0; i < 3; i++)
-                try
-                {
-                    Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    socket.Connect(point);
-                    //Console.WriteLine("Enter string to send: ");
-                    String smsg = "Ready!";
-                    byte[] msg = System.Text.Encoding.UTF8.GetBytes(smsg);
-                    int nbytes = socket.Send(msg, smsg.Length, SocketFlags.None);
+            IPEndPoint point = new IPEndPoint(ip, 8081);
+            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
 
+                socket.Connect(point);
+                String smsg = "Ready!";
+                byte[] msg = System.Text.Encoding.UTF8.GetBytes(smsg);
+                int nbytes = socket.Send(msg, msg.Length, SocketFlags.None);
+
+                if (nbytes > 0)
+                {
+                    byte[] buff = new byte[256];
+                    nbytes = socket.Receive(buff, 0, 256, SocketFlags.None);
                     if (nbytes > 0)
                     {
-                        byte[] buff = new byte[256];
-                        nbytes = socket.Receive(buff, 0, 256, SocketFlags.None);
-                        if (nbytes > 0)
-                        {
-                            String s1 = Encoding.UTF8.GetString(buff, 0, buff.Length);
-                            Console.WriteLine("Received: " + s1);
-                        }
+                        String s1 = Encoding.UTF8.GetString(buff, 0, nbytes);
+                        Console.WriteLine("Received: " + s1);
                     }
-                    socket.Dispose();
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error: " + ex.Message);
-                }
-        }
-
-        }
+                socket.Shutdown(SocketShutdown.Both);
+                socket.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+                
+            
+        }   
     }
+}
 

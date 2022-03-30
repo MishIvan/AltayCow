@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MarkTest
@@ -15,17 +16,27 @@ namespace MarkTest
             IPAddress ip = IPAddress.Parse(Settings.Default.IP);
             IPEndPoint point = new IPEndPoint(ip, Convert.ToInt32(Settings.Default.Port));
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            //Console.WriteLine($"Soket {Settings.Default.IP}:{Settings.Default.Port}");
-            try
+            socket.Bind(point);
+            socket.Listen(10);
+            Console.WriteLine($"Soket {Settings.Default.IP}:{Settings.Default.Port} is listening...");
+            Thread thread = new Thread(new ParameterizedThreadStart(RunListen))
             {
-                socket.Bind(point);
-                socket.Listen(10);
-                Console.WriteLine($"Soket {Settings.Default.IP}:{Settings.Default.Port} is listening...");
-                string message = String.Empty;
-                int n;
-                while (true)
+                IsBackground = true
+            };
+            thread.Start(socket);
+            thread.Join();
+        }
+        static void RunListen(Object o)
+        {
+            Socket tSock = o as Socket;
+            int n;
+            string message = String.Empty;
+            while (true)
+            {
+                try
                 {
-                    Socket handler = socket.Accept();
+
+                    Socket handler = tSock.Accept();
                     do
                     {
                         Console.WriteLine("End Point: " + handler.RemoteEndPoint.ToString());
@@ -34,7 +45,7 @@ namespace MarkTest
                         if (n > 0)
                         {
                             String s1 = Encoding.UTF8.GetString(buff, 0, n);
-                            Console.WriteLine("Received : " + s1 + "\n");                            
+                            Console.WriteLine("Received : " + s1 + "\n");
 
                             Console.WriteLine("Enter message to send: ");
                             message = Console.ReadLine();
@@ -46,14 +57,16 @@ namespace MarkTest
                     } while (handler.Available > 0);
                     handler.Shutdown(SocketShutdown.Both);
                     handler.Close();
+                }                
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
             }
         }
 
     }
+
 }
+
 
