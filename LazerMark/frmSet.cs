@@ -6,7 +6,7 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
-namespace SocketSample
+namespace LazerMark
 {
     public class frmSet : Form
     {

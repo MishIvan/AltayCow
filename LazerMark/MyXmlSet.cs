@@ -12,7 +12,8 @@ namespace LazerMark
             string innerText;
             try
             {
-                string xmlfile = LazerMark.Properties.Resources.CFG_FILE; 
+                string xmlfile = LazerMark.Properties.Resources.CFG_FILE;
+                string s1 = System.IO.Path.GetFullPath(xmlfile);
                 XmlDocument doc = new XmlDocument();
                 doc.Load(xmlfile);
                 innerText = doc.SelectSingleNode(path).InnerText;

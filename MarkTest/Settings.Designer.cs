@@ -25,7 +25,7 @@ namespace MarkTest {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("192.168.0.100")]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.1.30")]
         public string IP {
             get {
                 return ((string)(this["IP"]));
@@ -34,7 +34,7 @@ namespace MarkTest {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("8081")]
+        [global::System.Configuration.DefaultSettingValueAttribute("34567")]
         public string Port {
             get {
                 return ((string)(this["Port"]));

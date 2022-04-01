@@ -12,7 +12,7 @@ using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
 
-namespace SocketSample
+namespace LazerMark
 {
     public class Form1 : Form
     {
@@ -87,7 +87,7 @@ namespace SocketSample
 
         private void AutoPrint()
         {
-            Timer t = new Timer(10);
+            System.Timers.Timer t = new System.Timers.Timer(10);
             t.Elapsed += new ElapsedEventHandler(this.CheckData);
             t.AutoReset = true;
             t.Enabled = true;

@@ -12,32 +12,37 @@ namespace TSocket
         {
             IPAddress ip = IPAddress.Parse("192.168.0.100");
             IPEndPoint point = new IPEndPoint(ip, 8081);
-            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            //Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
-                socket.Bind(point);
-                socket.Listen(10);
-                Console.WriteLine("Soket 192.168.0.100:8081 is opened. Listening...");
+                //socket.Bind(point);
+                //socket.Listen(10);
+                //Console.WriteLine("Soket 192.168.0.100:8081 is opened. Listening...");
                 string message = "Success!";
                 int n;
                 while (true)
                 {
-                    Socket handler = socket.Accept();
+                    Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    if (!socket.Connected) socket.Connect(point);
                     do
                     {
-                        Console.WriteLine("End Point: " + handler.RemoteEndPoint.ToString());
+                        Console.WriteLine("End Point: " + socket.RemoteEndPoint.ToString());
                         byte[] buff = new byte[1024];
-                        n = handler.Receive(buff);
+                        n = socket.Receive(buff);
                         if (n > 0)
                         {
                             String s1 = Encoding.UTF8.GetString(buff, 0, n);
                             Console.WriteLine("Received : " + s1 + "\n");
                             byte[] msg = System.Text.Encoding.UTF8.GetBytes(message);
-                            handler.Send(msg);
+                            socket.Send(msg);
                         }
-                    } while (handler.Available > 0);
-                    handler.Shutdown(SocketShutdown.Both);
-                    handler.Close();
+                    } while (socket.Available > 0);
+                    if(socket.Connected)
+                    {
+                        socket.Shutdown(SocketShutdown.Both);
+                        socket.Disconnect(true);
+                        socket.Close();
+                    }
                 }
             }
             catch(Exception ex)
