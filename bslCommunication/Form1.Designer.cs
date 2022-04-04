@@ -229,7 +229,6 @@ namespace SocketSample
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "BslSockets System";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_Closing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
