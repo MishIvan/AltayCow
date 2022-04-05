@@ -21,6 +21,7 @@ namespace SocketSample
         delegate void evtHandler(object o, EventArgs evtarg);
         int dataRowCount;
         int dataRowNumber;
+        bool receiving;
 
         public Form1()
         {
@@ -29,6 +30,7 @@ namespace SocketSample
             timeout = 0;
             dataRowCount = 0;
             dataRowNumber = -1;
+            receiving = false;
         }
 
         private void AcceptInfo(object o)
@@ -44,7 +46,14 @@ namespace SocketSample
                     this.ShowLogMessage(string.Concat(point, "Connect successfully！"));
                     this.txtIpPort.Text = point;
                     this.dic.Add(point, tSocket);
-                    if(this.dataRowNumber >= this.dataRowCount) Invoke(evt, btnStart, null);
+                    if (this.dataRowNumber == -1 && this.dataRowCount == 0) {
+                        CheckData(null, null);
+                    }
+                    else
+                    {
+                        if (!receiving && this.dataRowNumber < this.dataRowCount) MySendMsg();
+                    }
+                    
                     Thread th = new Thread(new ParameterizedThreadStart(this.ReceiveMsg))
                     {
                         IsBackground = true
@@ -210,6 +219,7 @@ namespace SocketSample
                     this.ShowLogMessage(string.Concat(client.RemoteEndPoint.ToString(), ":", words));
                     if (n > 0)
                     {
+                        receiving = true;
                         int nDataLineNumber = this.dataRowNumber;//int.Parse(MyXmlSet.GetMyConfig("/configuration/dataLineNumber"));
                         int dataRowCount = this.dataRowCount;// int.Parse(MyXmlSet.GetMyConfig("/configuration/dataRowCount"));
                         if (nDataLineNumber >= dataRowCount)
@@ -242,13 +252,14 @@ namespace SocketSample
                         {
                             //MyXmlSet.SetMyConfig("/configuration/dataLineNumber", Convert.ToString(nDataLineNumber + 1));
                             this.dataRowNumber = nDataLineNumber + 1;
-                            this.MySendMsg();
+                            this.MySendMsg();                            
                         }
                     }
                     else 
                     {
                         client.Shutdown(SocketShutdown.Both);
                         client.Close();
+                        receiving = false;
                         break;
                     }
                 }
