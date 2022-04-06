@@ -31,15 +31,11 @@ namespace SocketSample
 
         public Label lblPrintedCount;
 
-        private MenuStrip menuStrip1;
-
         private ToolStripMenuItem refferenceToolStripMenuItem;
 
         private ToolStripMenuItem systemSetingToolStripMenuItem;
 
         private Button btnStart;
-        private ToolStripMenuItem referenceToolStripMenuItem;
-        private ToolStripMenuItem systemSetToolStripMenuItem;
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
@@ -52,12 +48,13 @@ namespace SocketSample
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.lblPrintedCount = new System.Windows.Forms.Label();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.referenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.systemSetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refferenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemSetingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnStart = new System.Windows.Forms.Button();
+            this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.referenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.systemSetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -162,33 +159,6 @@ namespace SocketSample
             this.lblPrintedCount.Text = "Printing:0/0";
             this.lblPrintedCount.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // menuStrip1
-            // 
-            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.referenceToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(8, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(604, 30);
-            this.menuStrip1.TabIndex = 65;
-            this.menuStrip1.Text = "Recceffrence";
-            // 
-            // referenceToolStripMenuItem
-            // 
-            this.referenceToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.systemSetToolStripMenuItem});
-            this.referenceToolStripMenuItem.Name = "referenceToolStripMenuItem";
-            this.referenceToolStripMenuItem.Size = new System.Drawing.Size(89, 24);
-            this.referenceToolStripMenuItem.Text = "Reference";
-            // 
-            // systemSetToolStripMenuItem
-            // 
-            this.systemSetToolStripMenuItem.Name = "systemSetToolStripMenuItem";
-            this.systemSetToolStripMenuItem.Size = new System.Drawing.Size(162, 26);
-            this.systemSetToolStripMenuItem.Text = "System set";
-            this.systemSetToolStripMenuItem.Click += new System.EventHandler(this.systemSetingToolStripMenuItem_Click);
-            // 
             // refferenceToolStripMenuItem
             // 
             this.refferenceToolStripMenuItem.Name = "refferenceToolStripMenuItem";
@@ -213,6 +183,33 @@ namespace SocketSample
             this.btnStart.UseVisualStyleBackColor = true;
             this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
             // 
+            // referenceToolStripMenuItem
+            // 
+            this.referenceToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.systemSetToolStripMenuItem});
+            this.referenceToolStripMenuItem.Name = "referenceToolStripMenuItem";
+            this.referenceToolStripMenuItem.Size = new System.Drawing.Size(89, 24);
+            this.referenceToolStripMenuItem.Text = "Reference";
+            // 
+            // systemSetToolStripMenuItem
+            // 
+            this.systemSetToolStripMenuItem.Name = "systemSetToolStripMenuItem";
+            this.systemSetToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.systemSetToolStripMenuItem.Text = "System set";
+            this.systemSetToolStripMenuItem.Click += new System.EventHandler(this.systemSetingToolStripMenuItem_Click);
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.referenceToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(8, 3, 0, 3);
+            this.menuStrip1.Size = new System.Drawing.Size(604, 30);
+            this.menuStrip1.TabIndex = 65;
+            this.menuStrip1.Text = "Recceffrence";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -228,7 +225,7 @@ namespace SocketSample
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "BslSockets System";
+            this.Text = "Codes marking";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -247,5 +244,9 @@ namespace SocketSample
             base.Dispose(disposing);
         }
 
+        private FolderBrowserDialog folderBrowserDialog;
+        private ToolStripMenuItem referenceToolStripMenuItem;
+        private ToolStripMenuItem systemSetToolStripMenuItem;
+        private MenuStrip menuStrip1;
     }
 }

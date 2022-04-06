@@ -11,17 +11,18 @@ using System.Text;
 using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
+using System.Linq;
 
 namespace SocketSample
 {
     public partial class Form1 : Form
     {
         private Dictionary<string, Socket> dic = new Dictionary<string, Socket>();
-        int timeout;
-        delegate void evtHandler(object o, EventArgs evtarg);
-        int dataRowCount;
-        int dataRowNumber;
-        bool receiving;
+        int timeout; // интервал для отсылки собщений
+        int dataRowCount; // число строк для маркировки
+        int dataRowNumber; // текущая строка
+        bool receiving; // был ли получен код для маркировки
+        Queue<string> srcFiles; // очередь файлов для печати
 
         public Form1()
         {
@@ -31,12 +32,12 @@ namespace SocketSample
             dataRowCount = 0;
             dataRowNumber = -1;
             receiving = false;
+            srcFiles = new Queue<string>();
         }
 
         private void AcceptInfo(object o)
         {
             Socket socket = o as Socket;
-            evtHandler evt = btnStart_Click;
             while (true)
             {
                 try
@@ -125,13 +126,21 @@ namespace SocketSample
 
         private void CheckData(object source, ElapsedEventArgs e)
         {
-            string srcFile = MyXmlSet.GetMyConfig("/configuration/srcFile");
+            string srcFile = string.Empty; //MyXmlSet.GetMyConfig("/configuration/srcFile");
+            if(srcFiles.Count < 1)
+            {
+                MessageBox.Show("No one the source text file,please check source directory!");
+                return;
+            }
+            else
+                srcFile = srcFiles.Peek();
             if (File.Exists(srcFile))
             {
                 if (!File.Exists(MyPublicCS.destFile))
                 {
                     File.Copy(srcFile, MyPublicCS.destFile);
                     File.Delete(srcFile);
+                    srcFiles.Dequeue();
                     this.dataRowCount = 0;
                     DataTable dt = MyPublicCS.GetTxtData(MyPublicCS.destFile);
                     if ((dt == null ? true : dt.Rows.Count <= 0))
@@ -152,30 +161,39 @@ namespace SocketSample
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            this.MyInit();
-        }
-
-        private void frmSet_OnBrowseOpen(string s)
-        {
-            this.SetPrintedCount(s);
-        }
-
-
-        private void MyInit()
-        {
-            frmSet.OnBrowseOpen += new frmSet.DBrowseOpen(this.frmSet_OnBrowseOpen);
             if (File.Exists(MyPublicCS.destFile))
             {
                 File.Delete(MyPublicCS.destFile);
             }
             String tms = MyXmlSet.GetMyConfig("configuration/net/timeout");
             timeout = Convert.ToInt32(tms);
+            txtIP.Text = MyXmlSet.GetMyConfig("configuration/net/ip");
+            txtPort.Text = MyXmlSet.GetMyConfig("configuration/net/port");
             string prgPath = Environment.CurrentDirectory + "\\FinishedData";
             if (!Directory.Exists(prgPath))
             {
                 Directory.CreateDirectory(prgPath);
             }
-            btnStart.Enabled = false;    
+            btnStart.Visible = false;
+            FillSrcFles();
+        }
+        /// <summary>
+        /// Заполнить очередь исходных файлов с кодами
+        /// </summary>
+        private void FillSrcFles()
+        {
+            string srcDir = MyXmlSet.GetMyConfig("/configuration/srcFolder");
+            IEnumerable<string> files = Directory.EnumerateFiles(srcDir).Where(s=> s.ToLower().Contains(".txt")).OrderBy(s => s);
+            srcFiles.Clear(); 
+            foreach(string src in files)
+            {
+                srcFiles.Enqueue(src);
+            }
+        }
+
+        private void frmSet_OnBrowseOpen(string s)
+        {
+            this.SetPrintedCount(s);
         }
 
         private void MySendMsg()
@@ -247,6 +265,8 @@ namespace SocketSample
                             }
                             this.dataRowNumber = -1;
                             this.dataRowCount = 0;
+                            if (srcFiles.Count < 1) FillSrcFles();
+                            CheckData(null, null);
                         }
                         else
                         {
@@ -305,9 +325,20 @@ namespace SocketSample
             this.txtLog.AppendText(string.Concat(msg, "\r\n"));
         }
 
+        /// <summary>
+        /// задать папку, где располагаются исходные файлы с кодами для маркировки
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void systemSetingToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            (new frmSet()).Show();
+            folderBrowserDialog.Description = "Select source folder";
+            folderBrowserDialog.SelectedPath = MyXmlSet.GetMyConfig("/configuration/srcFolder");
+            if(folderBrowserDialog.ShowDialog() == DialogResult.OK)
+            {
+                MyXmlSet.SetMyConfig("/configuration/srcFolder", folderBrowserDialog.SelectedPath);
+                FillSrcFles();
+            }
         }
 
         public void WriteLogMsg(string s)
