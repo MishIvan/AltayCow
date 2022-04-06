@@ -48,18 +48,23 @@ namespace SocketSample
                     this.txtIpPort.Text = point;
                     this.dic.Add(point, tSocket);
                     if (this.dataRowNumber == -1 && this.dataRowCount == 0) {
+                        while(srcFiles.Count < 1)
+                        {
+                            FillSrcFles();
+                        }                        
                         CheckData(null, null);
                     }
                     else
                     {
                         if (!receiving && this.dataRowNumber < this.dataRowCount) MySendMsg();
                     }
-                    
-                    Thread th = new Thread(new ParameterizedThreadStart(this.ReceiveMsg))
-                    {
-                        IsBackground = true
-                    };
-                    th.Start(tSocket);
+
+                    //Thread th = new Thread(new ParameterizedThreadStart(this.ReceiveMsg))
+                    //{
+                    //    IsBackground = true
+                    //};
+                    //th.Start(tSocket);
+                    this.ReceiveMsg(tSocket);
                 }
                 catch (Exception exception)
                 {
@@ -139,8 +144,22 @@ namespace SocketSample
                 if (!File.Exists(MyPublicCS.destFile))
                 {
                     File.Copy(srcFile, MyPublicCS.destFile);
-                    File.Delete(srcFile);
-                    srcFiles.Dequeue();
+                    bool occuped = false;
+                    while (!occuped)
+                    {
+                        try
+                        {
+                            File.Delete(srcFile);
+                            srcFiles.Dequeue();
+                            occuped = false;
+                        }
+                        catch (IOException)
+                        {
+                            occuped = true;
+                        }
+
+                    }
+
                     this.dataRowCount = 0;
                     DataTable dt = MyPublicCS.GetTxtData(MyPublicCS.destFile);
                     if ((dt == null ? true : dt.Rows.Count <= 0))
@@ -265,7 +284,10 @@ namespace SocketSample
                             }
                             this.dataRowNumber = -1;
                             this.dataRowCount = 0;
-                            if (srcFiles.Count < 1) FillSrcFles();
+                            while (srcFiles.Count < 1)
+                            {
+                                FillSrcFles();
+                            }
                             CheckData(null, null);
                         }
                         else
