@@ -144,18 +144,18 @@ namespace SocketSample
                 if (!File.Exists(MyPublicCS.destFile))
                 {
                     File.Copy(srcFile, MyPublicCS.destFile);
-                    bool occuped = false;
-                    while (!occuped)
+                    // ждать деблокировки исходного файла
+                    while (true)
                     {
                         try
                         {
                             File.Delete(srcFile);
                             srcFiles.Dequeue();
-                            occuped = false;
+                            break;
                         }
                         catch (IOException)
                         {
-                            occuped = true;
+                            continue;
                         }
 
                     }
@@ -356,7 +356,9 @@ namespace SocketSample
         {
             folderBrowserDialog.Description = "Select source folder";
             folderBrowserDialog.SelectedPath = MyXmlSet.GetMyConfig("/configuration/srcFolder");
-            if(folderBrowserDialog.ShowDialog() == DialogResult.OK)
+            if (!Directory.Exists(folderBrowserDialog.SelectedPath))
+                folderBrowserDialog.SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
                 MyXmlSet.SetMyConfig("/configuration/srcFolder", folderBrowserDialog.SelectedPath);
                 FillSrcFles();
