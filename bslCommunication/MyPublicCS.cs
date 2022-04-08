@@ -97,9 +97,10 @@ namespace SocketSample
             return dataTable;
         }
 
-        public static int FillQueue(string strFile, Queue<string> qstring)
+        public static int FillQueue(string strFile, Queue<string> qstring, ref string message)
         {
             qstring.Clear();
+            message = string.Empty;
             try
             {
                 StreamReader sr = new StreamReader(strFile, Encoding.GetEncoding("utf-8"));
@@ -116,9 +117,12 @@ namespace SocketSample
                     }
                 }
                 sr.Close();
+                if (qstring.Count < 1)
+                    message = "NO error: Data file can be read, but it's empty.";
             }
             catch (Exception exception)
-            {                
+            {
+                message = "Reading error: "+ exception.Message;
                 return qstring.Count;
             }
             return qstring.Count;

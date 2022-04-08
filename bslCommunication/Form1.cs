@@ -49,7 +49,7 @@ namespace SocketSample
                     this.ShowLogMessage(string.Concat(point, "Connect successfully！"));
                     this.txtIpPort.Text = point;
                     this.dic.Add(point, tSocket);
-                    if (codes.Count < 1 /*this.dataRowNumber == -1 && this.dataRowCount == 0*/) {
+                    if (codes.Count < 1 ) {
                         while(srcFiles.Count < 1)
                         {
                             FillSrcFles();
@@ -58,14 +58,9 @@ namespace SocketSample
                     }
                     else
                     {
-                        if (!receiving && codes.Count > 0/*this.dataRowNumber < this.dataRowCount*/) MySendMsg();
+                        if (!receiving && codes.Count > 0) MySendMsg();
                     }
 
-                    //Thread th = new Thread(new ParameterizedThreadStart(this.ReceiveMsg))
-                    //{
-                    //    IsBackground = true
-                    //};
-                    //th.Start(tSocket);
                     this.ReceiveMsg(tSocket);
                 }
                 catch (Exception exception)
@@ -143,40 +138,38 @@ namespace SocketSample
                 srcFile = srcFiles.Peek();
             if (File.Exists(srcFile))
             {
-                if (!File.Exists(MyPublicCS.destFile))
+                //if (!File.Exists(MyPublicCS.destFile))
+                //{
+                //    File.Copy(srcFile, MyPublicCS.destFile);
+                // ждать деблокировки исходного файла
+                //while (true)
+                //{
+                //    try
+                //    {
+                //        File.Delete(srcFile);
+                //        srcFiles.Dequeue();
+                //        break;
+                //    }
+                //    catch (IOException)
+                //    {
+                //        continue;
+                //    }
+
+                //}
+                string msg = string.Empty;
+                MyPublicCS.FillQueue(srcFile/*MyPublicCS.destFile*/, codes, ref msg);
+                this.dataRowCount = codes.Count;
+                if (this.dataRowCount < 1)
                 {
-                    File.Copy(srcFile, MyPublicCS.destFile);
-                    // ждать деблокировки исходного файла
-                    while (true)
-                    {
-                        try
-                        {
-                            File.Delete(srcFile);
-                            srcFiles.Dequeue();
-                            break;
-                        }
-                        catch (IOException)
-                        {
-                            continue;
-                        }
-
-                    }
-
-                    //this.dataRowCount = 0;
-                    // DataTable dt = MyPublicCS.GetTxtData(MyPublicCS.destFile);
-                    MyPublicCS.FillQueue(MyPublicCS.destFile, codes);
-                    this.dataRowCount = codes.Count;
-                    if (this.dataRowCount < 1 /*(dt == null ? true : dt.Rows.Count <= 0)*/)
-                    {
-                        MessageBox.Show("The source text file is empty,please check!");
-                    }
-                    else
-                    {
-                        //this.dataRowCount = dt.Rows.Count;
-                        this.dataRowNumber = 1;
-                        this.MySendMsg();
-                    }
+                    //MessageBox.Show("The source text file is empty,please check!");
+                    if(!string.IsNullOrEmpty(msg)) WriteLogMsg(msg);
                 }
+                else
+                {
+                    this.dataRowNumber = 1;
+                    this.MySendMsg();
+                }
+                //}
             }
         }
 
@@ -219,27 +212,15 @@ namespace SocketSample
 
         private void MySendMsg()
         {
-            //DataTable dtSrc = MyPublicCS.GetTxtData(MyPublicCS.destFile);
-            if (codes.Count > 0 /*(dtSrc == null ? false : dtSrc.Rows.Count >= 1)*/)
+            if (codes.Count > 0)
             {                
                 string nDataLineNumber = this.dataRowNumber.ToString(); 
                 string dataRowCount = this.dataRowCount.ToString();
-                //string msg = "";
-                //for (int i = 0; i < dtSrc.Rows.Count; i++)
-                //{
-                //    if (nDataLineNumber == dtSrc.Rows[i][0].ToString())
-                //    {
-                //        msg = dtSrc.Rows[i][1].ToString();
-                //    }
-                //}
                 string msg = codes.Dequeue();
-                //if (msg.Trim() != "")
-                //{                    
-                    this.SendMsg(msg);
-                    this.ShowLogMessage("Sent: "+ msg);
-                    this.SetPrintedCount(string.Concat("Printing:", nDataLineNumber, "/", dataRowCount));
-                    this.dataRowNumber++;
-                //}
+                this.SendMsg(msg);
+                this.ShowLogMessage("Sent: "+ msg);
+                this.SetPrintedCount(string.Concat("Printing:", nDataLineNumber, "/", dataRowCount));
+                this.dataRowNumber++;
             }
             else
             {
@@ -261,9 +242,7 @@ namespace SocketSample
                     if (n > 0)
                     {
                         receiving = true;
-                        //int nDataLineNumber = this.dataRowNumber;
-                        //int dataRowCount = this.dataRowCount;
-                        if (codes.Count < 1 /*nDataLineNumber >= dataRowCount*/)
+                        if (codes.Count < 1)
                         {
                             this.SetPrintedCount("Printing completed!");
                             DateTime now = DateTime.Now;
@@ -281,10 +260,12 @@ namespace SocketSample
                             year[6] = now.Millisecond;
                             year[7] = ".txt";
                             string finishedFile = string.Concat(year);
-                            if (File.Exists(MyPublicCS.destFile))
+                            string srcFile = srcFiles.Peek();
+                            if (File.Exists(srcFile/*MyPublicCS.destFile*/))
                             {
-                                File.Copy(MyPublicCS.destFile, string.Concat(MyPublicCS.finishedFolder, finishedFile));
-                                File.Delete(MyPublicCS.destFile);
+                                File.Copy(srcFile/*MyPublicCS.destFile*/, string.Concat(MyPublicCS.finishedFolder, finishedFile));
+                                File.Delete(srcFile/*MyPublicCS.destFile*/);
+                                srcFiles.Dequeue();
                             }
                             this.dataRowNumber = -1;
                             this.dataRowCount = 0;
@@ -296,8 +277,6 @@ namespace SocketSample
                         }
                         else
                         {
-                            //MyXmlSet.SetMyConfig("/configuration/dataLineNumber", Convert.ToString(nDataLineNumber + 1));
-                            //this.dataRowNumber = nDataLineNumber + 1;
                             this.dataRowNumber++;
                             this.MySendMsg();                            
                         }
