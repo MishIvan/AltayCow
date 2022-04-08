@@ -22,7 +22,8 @@ namespace SocketSample
         int dataRowCount; // число строк для маркировки
         int dataRowNumber; // текущая строка
         bool receiving; // был ли получен код для маркировки
-        Queue<string> srcFiles; // очередь файлов для печати
+        Queue<string> srcFiles; // очередь файлов данных для печати
+        Queue<string> codes; // очередь кодов для печати
 
         public Form1()
         {
@@ -33,6 +34,7 @@ namespace SocketSample
             dataRowNumber = -1;
             receiving = false;
             srcFiles = new Queue<string>();
+            codes = new Queue<string>();
         }
 
         private void AcceptInfo(object o)
@@ -47,7 +49,7 @@ namespace SocketSample
                     this.ShowLogMessage(string.Concat(point, "Connect successfully！"));
                     this.txtIpPort.Text = point;
                     this.dic.Add(point, tSocket);
-                    if (this.dataRowNumber == -1 && this.dataRowCount == 0) {
+                    if (codes.Count < 1 /*this.dataRowNumber == -1 && this.dataRowCount == 0*/) {
                         while(srcFiles.Count < 1)
                         {
                             FillSrcFles();
@@ -56,7 +58,7 @@ namespace SocketSample
                     }
                     else
                     {
-                        if (!receiving && this.dataRowNumber < this.dataRowCount) MySendMsg();
+                        if (!receiving && codes.Count > 0/*this.dataRowNumber < this.dataRowCount*/) MySendMsg();
                     }
 
                     //Thread th = new Thread(new ParameterizedThreadStart(this.ReceiveMsg))
@@ -131,7 +133,7 @@ namespace SocketSample
 
         private void CheckData(object source, ElapsedEventArgs e)
         {
-            string srcFile = string.Empty; //MyXmlSet.GetMyConfig("/configuration/srcFile");
+            string srcFile = string.Empty; 
             if(srcFiles.Count < 1)
             {
                 MessageBox.Show("No one the source text file,please check source directory!");
@@ -160,18 +162,18 @@ namespace SocketSample
 
                     }
 
-                    this.dataRowCount = 0;
-                    DataTable dt = MyPublicCS.GetTxtData(MyPublicCS.destFile);
-                    if ((dt == null ? true : dt.Rows.Count <= 0))
+                    //this.dataRowCount = 0;
+                    // DataTable dt = MyPublicCS.GetTxtData(MyPublicCS.destFile);
+                    MyPublicCS.FillQueue(MyPublicCS.destFile, codes);
+                    this.dataRowCount = codes.Count;
+                    if (this.dataRowCount < 1 /*(dt == null ? true : dt.Rows.Count <= 0)*/)
                     {
                         MessageBox.Show("The source text file is empty,please check!");
                     }
                     else
                     {
-                        this.dataRowCount = dt.Rows.Count;
+                        //this.dataRowCount = dt.Rows.Count;
                         this.dataRowNumber = 1;
-                        //MyXmlSet.SetMyConfig("/configuration/dataRowCount", dataRowCount.ToString());
-                        //MyXmlSet.SetMyConfig("/configuration/dataLineNumber", "1");
                         this.MySendMsg();
                     }
                 }
@@ -217,25 +219,27 @@ namespace SocketSample
 
         private void MySendMsg()
         {
-            DataTable dtSrc = MyPublicCS.GetTxtData(MyPublicCS.destFile);
-            if ((dtSrc == null ? false : dtSrc.Rows.Count >= 1))
-            {
-                string nDataLineNumber = this.dataRowNumber.ToString(); //MyXmlSet.GetMyConfig("/configuration/dataLineNumber");
-                string dataRowCount = this.dataRowCount.ToString();//MyXmlSet.GetMyConfig("/configuration/dataRowCount");
-                string msg = "";
-                for (int i = 0; i < dtSrc.Rows.Count; i++)
-                {
-                    if (nDataLineNumber == dtSrc.Rows[i][0].ToString())
-                    {
-                        msg = dtSrc.Rows[i][1].ToString();
-                    }
-                }
-                if (msg.Trim() != "")
-                {
+            //DataTable dtSrc = MyPublicCS.GetTxtData(MyPublicCS.destFile);
+            if (codes.Count > 0 /*(dtSrc == null ? false : dtSrc.Rows.Count >= 1)*/)
+            {                
+                string nDataLineNumber = this.dataRowNumber.ToString(); 
+                string dataRowCount = this.dataRowCount.ToString();
+                //string msg = "";
+                //for (int i = 0; i < dtSrc.Rows.Count; i++)
+                //{
+                //    if (nDataLineNumber == dtSrc.Rows[i][0].ToString())
+                //    {
+                //        msg = dtSrc.Rows[i][1].ToString();
+                //    }
+                //}
+                string msg = codes.Dequeue();
+                //if (msg.Trim() != "")
+                //{                    
                     this.SendMsg(msg);
                     this.ShowLogMessage("Sent: "+ msg);
                     this.SetPrintedCount(string.Concat("Printing:", nDataLineNumber, "/", dataRowCount));
-                }
+                    this.dataRowNumber++;
+                //}
             }
             else
             {
@@ -257,9 +261,9 @@ namespace SocketSample
                     if (n > 0)
                     {
                         receiving = true;
-                        int nDataLineNumber = this.dataRowNumber;//int.Parse(MyXmlSet.GetMyConfig("/configuration/dataLineNumber"));
-                        int dataRowCount = this.dataRowCount;// int.Parse(MyXmlSet.GetMyConfig("/configuration/dataRowCount"));
-                        if (nDataLineNumber >= dataRowCount)
+                        //int nDataLineNumber = this.dataRowNumber;
+                        //int dataRowCount = this.dataRowCount;
+                        if (codes.Count < 1 /*nDataLineNumber >= dataRowCount*/)
                         {
                             this.SetPrintedCount("Printing completed!");
                             DateTime now = DateTime.Now;
@@ -293,7 +297,8 @@ namespace SocketSample
                         else
                         {
                             //MyXmlSet.SetMyConfig("/configuration/dataLineNumber", Convert.ToString(nDataLineNumber + 1));
-                            this.dataRowNumber = nDataLineNumber + 1;
+                            //this.dataRowNumber = nDataLineNumber + 1;
+                            this.dataRowNumber++;
                             this.MySendMsg();                            
                         }
                     }

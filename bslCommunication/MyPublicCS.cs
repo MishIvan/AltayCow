@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Text;
@@ -95,5 +96,33 @@ namespace SocketSample
             dataTable = dt;
             return dataTable;
         }
+
+        public static int FillQueue(string strFile, Queue<string> qstring)
+        {
+            qstring.Clear();
+            try
+            {
+                StreamReader sr = new StreamReader(strFile, Encoding.GetEncoding("utf-8"));
+                while (true)
+                {
+                    string str = sr.ReadLine();
+                    if (str == null)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        if(!string.IsNullOrEmpty(str)) qstring.Enqueue(str);
+                    }
+                }
+                sr.Close();
+            }
+            catch (Exception exception)
+            {                
+                return qstring.Count;
+            }
+            return qstring.Count;
+        }
+
     }
 }
