@@ -118,7 +118,7 @@ namespace SocketSample
                 }
                 sr.Close();
                 if (qstring.Count < 1)
-                    message = "NO error: Data file can be read, but it's empty.";
+                    message = "NO error: Data file can be read, but it's empty. Please, check it.";
             }
             catch (Exception exception)
             {

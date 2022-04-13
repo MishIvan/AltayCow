@@ -157,18 +157,23 @@ namespace SocketSample
 
                 //}
                 string msg = string.Empty;
-                MyPublicCS.FillQueue(srcFile/*MyPublicCS.destFile*/, codes, ref msg);
+                do
+                {
+                    MyPublicCS.FillQueue(srcFile/*MyPublicCS.destFile*/, codes, ref msg);
+                    if (!string.IsNullOrEmpty(msg)) WriteLogMsg(msg);
+
+                } while (codes.Count < 1);
                 this.dataRowCount = codes.Count;
-                if (this.dataRowCount < 1)
-                {
-                    //MessageBox.Show("The source text file is empty,please check!");
-                    if(!string.IsNullOrEmpty(msg)) WriteLogMsg(msg);
-                }
-                else
-                {
+                //if (this.dataRowCount < 1)
+                //{
+                //    //MessageBox.Show("The source text file is empty,please check!");
+                //    if(!string.IsNullOrEmpty(msg)) WriteLogMsg(msg);
+                //}
+                //else
+                //{
                     this.dataRowNumber = 1;
                     this.MySendMsg();
-                }
+                //}
                 //}
             }
         }
@@ -216,7 +221,8 @@ namespace SocketSample
             {                
                 string nDataLineNumber = this.dataRowNumber.ToString(); 
                 string dataRowCount = this.dataRowCount.ToString();
-                string msg = codes.Dequeue();
+                //string msg = codes.Dequeue();
+                string msg = codes.Peek();
                 this.SendMsg(msg);
                 this.ShowLogMessage("Sent: "+ msg);
                 this.SetPrintedCount(string.Concat("Printing:", nDataLineNumber, "/", dataRowCount));
@@ -242,6 +248,7 @@ namespace SocketSample
                     if (n > 0)
                     {
                         receiving = true;
+                        codes.Dequeue();
                         if (codes.Count < 1)
                         {
                             this.SetPrintedCount("Printing completed!");
