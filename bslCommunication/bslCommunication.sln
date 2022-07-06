@@ -1,0 +1,17 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bslCommunication", "bslCommunication.csproj", "{402E1994-1A1B-4F37-90F7-BA050F7E779B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{402E1994-1A1B-4F37-90F7-BA050F7E779B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{402E1994-1A1B-4F37-90F7-BA050F7E779B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{402E1994-1A1B-4F37-90F7-BA050F7E779B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{402E1994-1A1B-4F37-90F7-BA050F7E779B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
